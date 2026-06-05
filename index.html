@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moin Shadab | macOS Portfolio</title>
+    <style>
+        /* CSS Variables for macOS Sonoma Theme */
+        :root {
+            --glass-bg: rgba(25, 25, 25, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --text-color: #ffffff;
+            --highlight: #007aff;
+            --window-bg: rgba(30, 30, 30, 0.85);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            /* macOS Abstract Wallpaper vibe */
+            background: linear-gradient(135deg, #1f1c2c 0%, #928dab 100%);
+            background-size: cover;
+            height: 100vh;
+            overflow: hidden;
+            color: var(--text-color);
+        }
+
+        /* Top Menu Bar */
+        .menu-bar {
+            height: 30px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            font-size: 14px;
+            font-weight: 500;
+            border-bottom: 1px solid var(--glass-border);
+            z-index: 1000;
+            position: relative;
+        }
+
+        .menu-left span { margin-right: 20px; cursor: pointer; }
+        .menu-left span:hover { color: #ccc; }
+        .menu-right span { margin-left: 15px; }
+
+        /* Desktop Area */
+        .desktop {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            height: calc(100vh - 100px);
+            position: relative;
+        }
+
+        /* Desktop Icons */
+        .desktop-icon {
+            width: 80px;
+            text-align: center;
+            cursor: pointer;
+            border-radius: 5px;
+            padding: 10px 5px;
+            transition: background 0.2s;
+        }
+        .desktop-icon:hover { background: rgba(255, 255, 255, 0.1); }
+        .desktop-icon .icon-img {
+            font-size: 40px;
+            margin-bottom: 5px;
+        }
+        .desktop-icon span {
+            font-size: 12px;
+            text-shadow: 0px 1px 3px rgba(0,0,0,0.8);
+            background: rgba(0,0,0,0.3);
+            padding: 2px 5px;
+            border-radius: 4px;
+        }
+
+        /* macOS Window */
+        .window {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.95);
+            width: 800px;
+            max-width: 90%;
+            height: 500px;
+            max-height: 80vh;
+            background: var(--window-bg);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            display: none; /* Hidden by default */
+            flex-direction: column;
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            z-index: 100;
+        }
+
+        .window.active {
+            display: flex;
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+            z-index: 200;
+        }
+
+        .window-header {
+            height: 40px;
+            background: rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+            border-radius: 12px 12px 0 0;
+            user-select: none;
+        }
+
+        .traffic-lights { display: flex; gap: 8px; }
+        .light { width: 12px; height: 12px; border-radius: 50%; cursor: pointer; }
+        .close { background: #ff5f56; }
+        .minimize { background: #ffbd2e; }
+        .maximize { background: #27c93f; }
+        .window-title { margin: 0 auto; font-size: 14px; font-weight: bold; color: #ccc; }
+
+        .window-content {
+            padding: 20px;
+            overflow-y: auto;
+            flex: 1;
+            line-height: 1.6;
+        }
+        
+        .window-content h2 { margin-bottom: 15px; color: var(--highlight); }
+        .window-content h3 { margin-top: 15px; margin-bottom: 5px; }
+        .window-content p, .window-content ul { margin-bottom: 15px; }
+        .window-content ul { padding-left: 20px; }
+        .window-content a { color: var(--highlight); text-decoration: none; }
+        .window-content a:hover { text-decoration: underline; }
+
+        /* Grid for Projects */
+        .project-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+        }
+        .project-card {
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--glass-border);
+        }
+        .project-card h4 { margin-bottom: 10px; }
+
+        /* Bottom Dock */
+        .dock-container {
+            position: absolute;
+            bottom: 15px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .dock {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 10px;
+            border-radius: 20px;
+            display: flex;
+            gap: 15px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .dock-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(0,0,0,0.4);
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 28px;
+            cursor: pointer;
+            transition: transform 0.2s cubic-bezier(0.25, 0.8, 0.25, 1), margin 0.2s;
+            position: relative;
+        }
+
+        .dock-icon:hover {
+            transform: scale(1.4) translateY(-10px);
+            margin: 0 10px;
+            background: var(--highlight);
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.4); }
+
+    </style>
+</head>
+<body>
+
+    <!-- Top Menu Bar -->
+    <div class="menu-bar">
+        <div class="menu-left">
+            <span></span>
+            <span style="font-weight: bold;">Moin Shadab</span>
+            <span>File</span>
+            <span>Edit</span>
+            <span>View</span>
+            <span>Help</span>
+        </div>
+        <div class="menu-right">
+            <span>100% 🔋</span>
+            <span>📶</span>
+            <span id="clock">10:00 AM</span>
+        </div>
+    </div>
+
+    <!-- Desktop Icons -->
+    <div class="desktop">
+        <div class="desktop-icon" onclick="toggleWindow('about-window')">
+            <div class="icon-img">👨‍💻</div>
+            <span>About_Me.txt</span>
+        </div>
+        <div class="desktop-icon" onclick="toggleWindow('exp-window')">
+            <div class="icon-img">💼</div>
+            <span>Experience.app</span>
+        </div>
+        <div class="desktop-icon" onclick="toggleWindow('projects-window')">
+            <div class="icon-img">📁</div>
+            <span>Projects</span>
+        </div>
+    </div>
+
+    <!-- Window 1: About Me -->
+    <div id="about-window" class="window">
+        <div class="window-header">
+            <div class="traffic-lights">
+                <div class="light close" onclick="closeWindow('about-window')"></div>
+                <div class="light minimize" onclick="closeWindow('about-window')"></div>
+                <div class="light maximize"></div>
+            </div>
+            <div class="window-title">About_Me.txt</div>
+        </div>
+        <div class="window-content">
+            <h2>Hi, I'm Moin Shadab</h2>
+            <p>I am a Backend Developer with 3 years of experience specializing in server design, ERP systems, accounting software, and company/hospital management tools.</p>
+            <h3>Tech Stack</h3>
+            <p>PHP, Laravel, MySQL, CouchDB, HTML, CSS, JS, React, jQuery, Core Java, C++, Prompt Engineering.</p>
+            <h3>Hobbies & Interests</h3>
+            <p>When I'm not coding, you can find me playing sports, running, reading books, or cooking. I'm always thinking of new ideas and implementing them—whether they turn out good or bad, it's all about the build!</p>
+            <h3>Connect</h3>
+            <p>
+                🔗 <a href="https://www.linkedin.com/in/moin-shadab-8a491b1b1/" target="_blank">LinkedIn</a> <br>
+                🔗 <a href="https://github.com/Moin-shadab" target="_blank">GitHub</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- Window 2: Experience -->
+    <div id="exp-window" class="window">
+        <div class="window-header">
+            <div class="traffic-lights">
+                <div class="light close" onclick="closeWindow('exp-window')"></div>
+                <div class="light minimize" onclick="closeWindow('exp-window')"></div>
+                <div class="light maximize"></div>
+            </div>
+            <div class="window-title">Experience.app</div>
+        </div>
+        <div class="window-content">
+            <h2>Work Experience</h2>
+            <h3>Advanced Microdevices Pvt. Ltd. (India)</h3>
+            <p><strong>Backend Developer (3 Years - Present)</strong></p>
+            <ul>
+                <li>Developed and managed ERP and accounting systems.</li>
+                <li>Built hospital and company management systems from scratch.</li>
+                <li>Integrated PhonePe payment gateways successfully.</li>
+                <li>Created fast, reliable tracking software tailored for legacy systems.</li>
+                <li><strong>Biggest Achievement:</strong> Engineered a complete International Email Client of my own, handling low-level IMAP protocols and mail flow.</li>
+                <li>Built a professional catalog barcode system and designed multiple robust APIs.</li>
+            </ul>
+            
+            <h3>Freelance / Part-Time</h3>
+            <p><strong>PLC Programmer (2 Years)</strong></p>
+            <ul>
+                <li>Developed logic and programmed programmable logic controllers for automated systems.</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Window 3: Projects -->
+    <div id="projects-window" class="window">
+        <div class="window-header">
+            <div class="traffic-lights">
+                <div class="light close" onclick="closeWindow('projects-window')"></div>
+                <div class="light minimize" onclick="closeWindow('projects-window')"></div>
+                <div class="light maximize"></div>
+            </div>
+            <div class="window-title">Projects Finder</div>
+        </div>
+        <div class="window-content">
+            <h2>Live Projects & Repositories</h2>
+            <div class="project-grid">
+                <div class="project-card">
+                    <h4>DSA Roadmap</h4>
+                    <p>A comprehensive guide for Data Structures and Algorithms.</p>
+                    <a href="https://moin-shadab.github.io/dsa-roadmap/" target="_blank">View Live</a>
+                </div>
+                <div class="project-card">
+                    <h4>ATS Resume Builder</h4>
+                    <p>A free, ATS-friendly resume builder to help candidates land interviews.</p>
+                    <a href="https://moin-shadab.github.io/resume-builder/" target="_blank">View Live</a>
+                </div>
+                <div class="project-card">
+                    <h4>International Email Client Flow</h4>
+                    <p>Deep dive into how low-level international mails work.</p>
+                    <a href="https://moin-shadab.github.io/email-work-flow/" target="_blank">View Live</a>
+                </div>
+                <div class="project-card">
+                    <h4>IMAP & PhonePe Guide</h4>
+                    <p>Payment integration and IMAP protocol execution.</p>
+                    <a href="https://moin-shadab.github.io/imap-protocol-and-payment-integration-guide/" target="_blank">View Live</a>
+                </div>
+                <div class="project-card">
+                    <h4>Web Piano</h4>
+                    <p>A functional, interactive piano built for the web.</p>
+                    <a href="https://moin-shadab.github.io/web-piano/" target="_blank">View Live</a>
+                </div>
+                <div class="project-card">
+                    <h4>Text to Handwriting</h4>
+                    <p>Python script to make notes easier by converting digital text to handwriting.</p>
+                    <a href="https://github.com/Moin-shadab/Text_To_Hand-Writing" target="_blank">GitHub Repo</a>
+                </div>
+                <div class="project-card">
+                    <h4>Unique Birthday Wish</h4>
+                    <p>A creative UI to send the best birthday wishes.</p>
+                    <a href="https://moin-shadab.github.io/girlfriend-friend-birthday-wish/" target="_blank">View Live</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Dock -->
+    <div class="dock-container">
+        <div class="dock">
+            <div class="dock-icon" title="About" onclick="toggleWindow('about-window')">👨‍💻</div>
+            <div class="dock-icon" title="Experience" onclick="toggleWindow('exp-window')">💼</div>
+            <div class="dock-icon" title="Projects" onclick="toggleWindow('projects-window')">📁</div>
+            <div class="dock-icon" title="GitHub" onclick="window.open('https://github.com/Moin-shadab', '_blank')">🐙</div>
+            <div class="dock-icon" title="LinkedIn" onclick="window.open('https://www.linkedin.com/in/moin-shadab-8a491b1b1/', '_blank')">🔗</div>
+        </div>
+    </div>
+
+    <!-- JavaScript for Interactions -->
+    <script>
+        // Update top bar clock
+        function updateClock() {
+            const now = new Date();
+            let hours = now.getHours();
+            let minutes = now.getMinutes();
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12; 
+            minutes = minutes < 10 ? '0' + minutes : minutes;
+            document.getElementById('clock').innerText = hours + ':' + minutes + ' ' + ampm;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // Window Management
+        function toggleWindow(id) {
+            const win = document.getElementById(id);
+            // Bring clicked window to front
+            document.querySelectorAll('.window').forEach(w => w.style.zIndex = 100);
+            
+            if (win.classList.contains('active')) {
+                win.classList.remove('active');
+            } else {
+                win.classList.add('active');
+                win.style.zIndex = 200;
+            }
+        }
+
+        function closeWindow(id) {
+            document.getElementById(id).classList.remove('active');
+        }
+
+        // Add focus functionality to windows so clicking them brings them to the front
+        document.querySelectorAll('.window').forEach(win => {
+            win.addEventListener('mousedown', function() {
+                document.querySelectorAll('.window').forEach(w => w.style.zIndex = 100);
+                this.style.zIndex = 200;
+            });
+        });
+    </script>
+</body>
+</html>
